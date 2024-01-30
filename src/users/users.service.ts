@@ -14,4 +14,6 @@ export class UsersService {
     const user = this.userRepository.create(dto);
     return await this.userRepository.save(user);
   }
+
+  async makeFriendRequest(friendId: number) {}
 }

@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { FriendsRequests } from '../friends-requests/friends-requests.model';
 
 @Entity()
 export class User {
@@ -10,4 +18,11 @@ export class User {
 
   @Column()
   password: string;
+
+  @ManyToMany(() => User, (user) => user.friends)
+  @JoinTable()
+  friends: User[];
+
+  @OneToMany(() => FriendsRequests, (friendRequest) => friendRequest.id)
+  friendRequests: FriendsRequests[];
 }
