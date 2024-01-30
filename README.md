@@ -1,6 +1,6 @@
 # Discord server v2
 
-## Start
+## Start in watch mode
 
 ```shell
 yarn && yarn start:dev

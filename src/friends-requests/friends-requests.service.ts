@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FriendsRequests } from './friends-requests.model';
 import { Repository } from 'typeorm';
 import { User } from '../users/users.model';
+import { FriendsRequestGateway } from './friends-request.gateway';
 
 @Injectable()
 export class FriendsRequestsService {
@@ -10,6 +11,7 @@ export class FriendsRequestsService {
     @InjectRepository(FriendsRequests)
     private readonly friendsRequestsRepository: Repository<FriendsRequests>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly friendsRequestGateway: FriendsRequestGateway,
   ) {}
 
   async makeFriendRequest(senderId: number, recipientId: number) {
@@ -39,6 +41,11 @@ export class FriendsRequestsService {
     const newRequest = this.friendsRequestsRepository.create({
       sender,
       recipient,
+    });
+
+    this.friendsRequestGateway.handleFriendRequest({
+      senderId,
+      recipientId,
     });
 
     return this.friendsRequestsRepository.save(newRequest);
