@@ -25,4 +25,10 @@ export class User {
 
   @OneToMany(() => FriendsRequests, (friendRequest) => friendRequest.id)
   friendRequests: FriendsRequests[];
+
+  toJSON() {
+    //  eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = this;
+    return result;
+  }
 }

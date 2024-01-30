@@ -1,4 +1,11 @@
-import { Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  ParseIntPipe,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { FriendsRequestsService } from './friends-requests.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -11,10 +18,9 @@ export class FriendsRequestsController {
   @UseGuards(JwtAuthGuard)
   @Post('/:id')
   makeFriendRequest(
-    @Param('id') recipientId: number,
-    @Req() { userId }: { userId: number },
+    @Param('id', ParseIntPipe) recipientId: number,
+    @Req() { userId: senderId }: { userId: number },
   ) {
-    console.log(userId);
-    return this.friendsRequestsService.makeFriendRequest(recipientId);
+    return this.friendsRequestsService.makeFriendRequest(senderId, recipientId);
   }
 }
