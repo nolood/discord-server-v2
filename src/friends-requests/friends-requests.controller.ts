@@ -38,4 +38,16 @@ export class FriendsRequestsController {
       recipientId,
     );
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/accept/:id')
+  acceptFriendRequest(
+    @Param('id', ParseIntPipe) requestId: number,
+    @Req() { userId: recipientId }: { userId: number },
+  ) {
+    return this.friendsRequestsService.acceptFriendRequest(
+      requestId,
+      recipientId,
+    );
+  }
 }

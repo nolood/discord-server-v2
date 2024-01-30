@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './users.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,5 +15,16 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  async makeFriendRequest(friendId: number) {}
+  async getUser(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['friends'],
+    });
+
+    if (!user) {
+      throw new HttpException('user-not-found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
+  }
 }
