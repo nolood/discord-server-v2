@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Param,
   ParseIntPipe,
   Post,
@@ -8,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { FriendsRequestsService } from './friends-requests.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Заявки в друзья')
 @Controller('friends/requests')
 export class FriendsRequestsController {
   constructor(
@@ -22,5 +25,17 @@ export class FriendsRequestsController {
     @Req() { userId: senderId }: { userId: number },
   ) {
     return this.friendsRequestsService.makeFriendRequest(senderId, recipientId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('/reject/:id')
+  rejectFriendRequest(
+    @Param('id', ParseIntPipe) requestId: number,
+    @Req() { userId: recipientId }: { userId: number },
+  ) {
+    return this.friendsRequestsService.rejectFriendRequest(
+      requestId,
+      recipientId,
+    );
   }
 }

@@ -43,4 +43,23 @@ export class FriendsRequestsService {
 
     return this.friendsRequestsRepository.save(newRequest);
   }
+
+  async rejectFriendRequest(requestId: number, recipientId: number) {
+    const request = await this.friendsRequestsRepository.findOne({
+      where: { id: requestId },
+      relations: ['recipient'],
+    });
+
+    if (!request) {
+      throw new HttpException('invalid-request', HttpStatus.BAD_REQUEST);
+    }
+
+    if (request.recipient.id !== recipientId) {
+      throw new HttpException('invalid-request', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.friendsRequestsRepository.remove(request);
+
+    return 'success';
+  }
 }
