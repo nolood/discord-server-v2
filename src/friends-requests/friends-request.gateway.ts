@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { User } from '../users/users.model';
+import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway(5001)
 export class FriendsRequestGateway
@@ -16,17 +17,26 @@ export class FriendsRequestGateway
   @WebSocketServer()
   server: Server;
 
+  constructor(private readonly authService: AuthService) {}
+
   private readonly users: Map<string, string> = new Map();
 
-  handleConnection(@ConnectedSocket() client: Socket): void {
-    const userId = client.handshake.query?.userId.toString();
-    const socketId = client.id;
+  handleConnection(@ConnectedSocket() client: Socket) {
+    try {
+      const userId = this.authService.handleWsAuth(
+        client.handshake.headers.authorization,
+      );
+      const socketId = client.id;
 
-    if (!userId || !socketId) {
-      throw new WsException('invalid-credentials');
+      if (!userId || !socketId) {
+        throw new WsException('Unauthorized');
+      }
+
+      this.users.set(userId, socketId);
+    } catch (e) {
+      client.emit('invalid-credentials');
+      client.disconnect();
     }
-
-    this.users.set(userId, socketId);
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket): void {

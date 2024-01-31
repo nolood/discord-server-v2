@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../users/users.model';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthService {
@@ -60,5 +65,16 @@ export class AuthService {
     return {
       token: this.jwtService.sign(payload),
     };
+  }
+
+  handleWsAuth(authHeader: string) {
+    const bearer = authHeader.split(' ')[0];
+    const token = authHeader.split(' ')[1];
+
+    if (bearer !== 'Bearer' || !token) {
+      return null;
+    }
+
+    return this.jwtService.verify(token).sub;
   }
 }
