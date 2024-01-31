@@ -3,10 +3,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { FriendsRequests } from '../friends-requests/friends-requests.model';
+import { Message } from '../messages/messages.model';
 
 @Entity()
 export class User {
@@ -25,6 +27,9 @@ export class User {
 
   @OneToMany(() => FriendsRequests, (friendRequest) => friendRequest.id)
   friendRequests: FriendsRequests[];
+
+  @OneToMany(() => Message, (message) => message.user)
+  messages: Message[];
 
   toJSON() {
     //  eslint-disable-next-line @typescript-eslint/no-unused-vars
