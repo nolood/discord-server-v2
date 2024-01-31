@@ -1,32 +1,50 @@
 import {
+  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { User } from '../users/users.model';
 
+@WebSocketGateway(5001)
 export class FriendsRequestGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayDisconnect, OnGatewayConnection
 {
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket, ...args: any[]): any {
-    // Todo
-    const userId = args[0].userId;
-    client.join(userId.toString());
+  private readonly users: Map<string, string> = new Map();
+
+  handleConnection(@ConnectedSocket() client: Socket): void {
+    const userId = client.handshake.query?.userId.toString();
+    const socketId = client.id;
+
+    if (!userId || !socketId) {
+      throw new WsException('invalid-credentials');
+    }
+
+    this.users.set(userId, socketId);
   }
 
-  handleDisconnect(client: Socket): any {
-    // Todo
+  handleDisconnect(@ConnectedSocket() client: Socket): void {
+    const socketId = client.id;
+
+    this.users.forEach((value, key) => {
+      if (value === socketId) {
+        this.users.delete(key);
+      }
+    });
   }
 
-  handleFriendRequest(payload: {
-    senderId: number;
-    recipientId: number;
-  }): void {
-    this.server
-      .to(payload.recipientId.toString())
-      .emit('friend-request', payload);
+  sendFriendRequest(recipientId: number, sender: User) {
+    const socketId = this.users.get(recipientId.toString());
+
+    this.server.to(socketId).emit('new-friend-request', {
+      msg: 'New friend request',
+      content: sender,
+    });
   }
 }

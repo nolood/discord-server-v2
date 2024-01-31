@@ -43,10 +43,7 @@ export class FriendsRequestsService {
       recipient,
     });
 
-    this.friendsRequestGateway.handleFriendRequest({
-      senderId,
-      recipientId,
-    });
+    this.friendsRequestGateway.sendFriendRequest(recipientId, sender);
 
     return this.friendsRequestsRepository.save(newRequest);
   }
